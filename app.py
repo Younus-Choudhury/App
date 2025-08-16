@@ -195,7 +195,7 @@ if st.button("🔮 Calculate My Premium", type="primary"):
         for factor in risk_factors:
             st.markdown(f"- {factor}")
 
----
+st.markdown("---")
 
 st.header("📊 Data Insights & Analysis")
 
@@ -281,7 +281,6 @@ with st.expander("🔍 Detailed Data Analysis", expanded=False):
         st.subheader("Model Performance Analysis")
         col1, col2 = st.columns(2)
         with col1:
-            # Note: This plot will not be accurate without a real test set
             st.info("This plot is for illustrative purposes as the test set is not available in the deployed app.")
         with col2:
             st.markdown("**Model Metrics:**")
@@ -302,7 +301,7 @@ with st.expander("🔍 Detailed Data Analysis", expanded=False):
         ax.set_title("Random Forest Feature Importance (Simulated)")
         st.pyplot(fig)
 
----
+st.markdown("---")
 
 with st.expander("🔎 Interactive Data Explorer"):
     st.subheader("BMI vs Charges by Smoking Status")
@@ -328,7 +327,7 @@ with st.expander("🔎 Interactive Data Explorer"):
     - Notice the clear separation between smoking and non-smoking populations
     """)
 
----
+st.markdown("---")
 
 with st.expander("📝 Full Report & Campaign Ideas", expanded=False):
     st.markdown("""
