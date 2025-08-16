@@ -5,9 +5,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 import time
-import joblib
 
 # Machine learning libraries
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 
 # 🎨 Streamlit App Configuration
@@ -60,16 +64,17 @@ st.markdown("""
 # Use modern plot style
 plt.style.use('seaborn-v0_8')
 
-# 📊 Data Loading and Model Loading Functions
-@st.cache_data
-def load_and_preprocess_data():
-    """Loads, cleans, and returns the preprocessed DataFrame."""
+# 📊 Data and Model Loading Function
+# This function is cached, so it only runs once and then the result is saved.
+@st.cache_resource
+def train_and_get_model():
+    """Loads data, trains the model, and returns it."""
     try:
         df = pd.read_csv("insurance.csv")
     except FileNotFoundError:
         st.error("⚠️ Error: 'insurance.csv' not found. Please make sure the file is in the same directory.")
         st.stop()
-        return None
+        return None, None
     
     df_clean = df.copy()
     df_clean = df_clean.drop_duplicates().reset_index(drop=True)
@@ -79,27 +84,42 @@ def load_and_preprocess_data():
     df_clean["bmi"] = pd.to_numeric(df_clean["bmi"], errors="coerce")
     df_clean["children"] = pd.to_numeric(df_clean["children"], errors="coerce").astype(int)
     df_clean["charges"] = pd.to_numeric(df_clean["charges"], errors="coerce")
-    return df_clean
+    
+    X = df_clean.drop(columns=["charges"])
+    y = df_clean["charges"]
 
-@st.cache_resource
-def load_model():
-    """Loads the pre-trained model from the file."""
-    try:
-        model = joblib.load("rf_model.joblib")
-        return model
-    except FileNotFoundError:
-        st.error("Error: rf_model.joblib not found. Please train and save the model first.")
-        st.stop()
-        return None
+    numeric_features = ["age", "bmi", "children"]
+    categorical_features = ["sex", "smoker", "region"]
+
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ("num", StandardScaler(), numeric_features),
+            ("cat", OneHotEncoder(drop="first", sparse_output=False), categorical_features),
+        ]
+    )
+    
+    rf_pipeline = Pipeline([
+        ("pre", preprocessor),
+        ("model", RandomForestRegressor(random_state=42, n_jobs=-1))
+    ])
+    
+    with st.spinner("⏳ Training model... This might take a minute..."):
+        rf_pipeline.fit(X, y)
+    
+    # Calculate performance metrics for display
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    y_pred = rf_pipeline.predict(X_test)
+    r2 = r2_score(y_test, y_pred)
+    rmse = mean_squared_error(y_test, y_pred, squared=False)
+    
+    return df_clean, rf_pipeline, r2, rmse
 
 # 🚀 Initialize Data and Model
-df_clean = load_and_preprocess_data()
-rf_pipeline = load_model()
+df_clean, rf_pipeline, r2, rmse = train_and_get_model()
 
-# Calculate and display model performance (requires a test set)
-# We will use dummy values for display since the test set is not loaded in this simplified app
-r2 = 0.85
-rmse = 4200
+# Handle case where file is not found
+if df_clean is None:
+    st.stop()
 
 # 🏥 Main Application Interface
 st.title("🏥 Insurance Premium Predictor")
