@@ -12,7 +12,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import mean_squared_error, r2_score, root_mean_squared_error
 
 # 🎨 Streamlit App Configuration
 st.set_page_config(
@@ -109,7 +109,7 @@ def train_and_get_model():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     y_pred = rf_pipeline.predict(X_test)
     r2 = r2_score(y_test, y_pred)
-    rmse = mean_squared_error(y_test, y_pred, squared=False)
+    rmse = root_mean_squared_error(y_test, y_pred)
     
     return df_clean, rf_pipeline, r2, rmse
 
@@ -434,7 +434,7 @@ with st.expander("📝 Full Report & Campaign Ideas", expanded=False):
     #### PRINT AD 3 – “The Reverse Tax” (Outdoor Poster)
     **Headline:** “The Better You Feel, The Less You Pay.”
     **Visual:** A smiling person dropping a gym bag on the floor, coins spilling out instead of sports gear.
-    **Copy:** Most bills go up over time. Yours doesn’t have to. Get healthier, and watch your insurance cost go into reverse. It’s the rare bill you’ll actually want to check.
+    **Copy:** Most bills go up over time. Yours doesn’t to. Get healthier, and watch your insurance cost go into reverse. It’s the rare bill you’ll actually want to check.
 
     #### RADIO SCRIPT – 30 Seconds
     **Title:** “The Bill That Cheers You On”
