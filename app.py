@@ -65,7 +65,6 @@ st.markdown("""
 plt.style.use('seaborn-v0_8')
 
 # 📊 Data and Model Loading Function
-# This function is cached, so it only runs once and then the result is saved.
 @st.cache_resource
 def train_and_get_model():
     """Loads data, trains the model, and returns it."""
@@ -74,7 +73,7 @@ def train_and_get_model():
     except FileNotFoundError:
         st.error("⚠️ Error: 'insurance.csv' not found. Please make sure the file is in the same directory.")
         st.stop()
-        return None, None
+        return None, None, None, None
     
     df_clean = df.copy()
     df_clean = df_clean.drop_duplicates().reset_index(drop=True)
